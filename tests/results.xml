@@ -1,6 +1,6 @@
 <testsuites name="results">
   <testsuite name="all" package="all">
-    <property name="random_seed" value="1784341270" />
-    <testcase name="test_register_file" classname="test_register" file="/home/atsomik/riscv-cpu/tests/test_register.py" lineno="12" time="0.0008311271667480469" sim_time_ns="21.0" ratio_time="25266.89156626506" />
+    <property name="random_seed" value="1784408146" />
+    <testcase name="test_alu" classname="test_alu" file="/home/atsomik/riscv-cpu/tests/test_alu.py" lineno="10" time="0.0008649826049804688" sim_time_ns="22.0" ratio_time="25434.0374862183" />
   </testsuite>
 </testsuites>
