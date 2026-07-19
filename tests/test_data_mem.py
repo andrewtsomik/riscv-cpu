@@ -46,7 +46,7 @@ async def test_data_mem(dut):
     assert val == 0x0000000, f"mem_rd=0 should drve 0: got {hex(val)}"
 
     val = await read_mem(dut, 0x08)
-    assert val == 0xDEADBEEF, f"Value lost after gated read: got {hex(got)}"
+    assert val == 0xDEADBEEF, f"Value lost after gated read: got {hex(val)}"
 
     val = await read_mem(dut, 0x88)
     assert val == 0xDEADBEEF, f"0x88 should alias 0x08: got {hex(val)}"

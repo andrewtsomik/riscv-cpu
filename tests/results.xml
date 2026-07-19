@@ -1,6 +1,6 @@
 <testsuites name="results">
   <testsuite name="all" package="all">
-    <property name="random_seed" value="1784497401" />
-    <testcase name="test_data_mem" classname="test_data_mem" file="/home/atsomik/riscv-cpu/tests/test_data_mem.py" lineno="19" time="0.0015671253204345703" sim_time_ns="42.0" ratio_time="26800.664536741213" />
+    <property name="random_seed" value="1784497575" />
+    <testcase name="test_data_mem" classname="test_data_mem" file="/home/atsomik/riscv-cpu/tests/test_data_mem.py" lineno="19" time="0.0013320446014404297" sim_time_ns="42.0" ratio_time="31530.475747270448" />
   </testsuite>
 </testsuites>
