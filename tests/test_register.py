@@ -28,6 +28,6 @@ async def test_register_file(dut):
     await Timer(1, unit="ns")
     assert dut.rd_dt1.value == 0, f"x0 not zero: {dut.rd_dt1.value}"
 
-    dut._log.info("Register file tests passed")
+     dut._log.info("Register file tests passed")
 
 

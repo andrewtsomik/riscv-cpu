@@ -1,9 +1,9 @@
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 
-VERILOG_SOURCES += ../rtl/risc_pkg.sv ../rtl/alu.sv
+VERILOG_SOURCES += ../rtl/risc_pkg.sv ../rtl/immediate_gen.sv
 
-TOPLEVEL = alu
-MODULE = test_alu
+TOPLEVEL = immediate_gen
+MODULE = test_immediate_gen
 
 include $(shell cocotb-config --makefiles)/Makefile.sim
