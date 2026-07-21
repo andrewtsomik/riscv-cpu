@@ -11,6 +11,11 @@ module register_file(
 );
 
 	logic [31:0] registers [0:31];
+	
+	initial begin
+		for(int i = 0; i < 32; i++)
+			registers[i] = 32'd0;
+	end
 
 	always_ff @(posedge clk) begin
 		if(wr_en && wr_addr != 5'd0)

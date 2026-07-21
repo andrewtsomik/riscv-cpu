@@ -4,9 +4,10 @@ module alu(
 	input logic [31:0] o1,
 	input logic [31:0] o2,
 	input alu_ops_e oper,
-	output logic [31:0] result	
+	output logic [31:0] result,
+	output logic zero	
 );
-
+	assign zero = (result == 32'd0);
 	always_comb begin
 		result = 32'd0;
 		case(oper)
