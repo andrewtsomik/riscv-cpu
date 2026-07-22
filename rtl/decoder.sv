@@ -76,6 +76,14 @@ module decoder(
 						3'b110 : alu_op = ALU_OR;
 						3'b100 : alu_op = ALU_XOR;
 						3'b010 : alu_op = ALU_SLT;
+						3'b001 : alu_op = ALU_SLL;
+						3'b101 : begin
+								if(instruct[30])
+									alu_op = ALU_SRA;
+								else
+									alu_op = ALU_SRL;
+							 end
+						3'b011 : alu_op = ALU_SLTU;
 					endcase
 			     end
 		       OP_IMM : begin
@@ -85,6 +93,14 @@ module decoder(
 						3'b110 : alu_op = ALU_OR;
 						3'b100 : alu_op = ALU_XOR;
 						3'b010 : alu_op = ALU_SLT;
+						3'b001 : alu_op = ALU_SLL;
+						3'b101 : begin
+								if(instruct[30])
+									alu_op = ALU_SRA;
+								else
+									alu_op = ALU_SRL;
+							 end
+						3'b011 : alu_op = ALU_SLTU;
 					endcase
 				end
 		      LOAD, STORE, AUIPC, JALR : alu_op = ALU_ADD;

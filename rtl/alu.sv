@@ -22,6 +22,10 @@ module alu(
 			ALU_OR : result = o1 | o2;
 			ALU_XOR : result = o1 ^ o2;
 			ALU_SLT : result = lt_signed;
+			ALU_SLTU : result = lt_unsigned;
+			ALU_SLL : result = o1 << o2[4:0];
+			ALU_SRL : result = o1 >> o2[4:0];
+			ALU_SRA : result = $signed(o1) >>> o2[4:0];
 		endcase
 	end
 endmodule
