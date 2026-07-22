@@ -5,7 +5,10 @@ package risc_pkg;
 		LOAD = 7'b0000011,
 		STORE = 7'b0100011,
 		BRANCH = 7'b1100011,
-		JAL = 7'b1101111
+		JAL = 7'b1101111,
+		JALR = 7'b1100111,
+		LUI = 7'b0110111,
+		AUIPC = 7'b0010111
 	} opcodes_e;
 
 	typedef enum logic [2:0] {

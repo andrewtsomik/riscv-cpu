@@ -7,8 +7,10 @@ module decoder(
 	output logic alu_src,
 	output logic mem_rd,
 	output logic mem_wr,
-	output logic mem_to_reg,
+	output logic [1:0] mem_to_reg,
 	output logic branch,
+	output logic jump,
+	output logic alu_a,
 	output alu_ops_e alu_op
 );
 
@@ -20,8 +22,10 @@ module decoder(
 		alu_src = 1'd0;
 		mem_rd = 1'd0;
 		mem_wr = 1'd0;
-		mem_to_reg = 1'd0;
+		mem_to_reg = 2'd0;
 		branch = 1'd0;
+		jump = 1'd0;
+		alu_a = 1'd0;
 		case(opcode)
 			OP : reg_wr = 1'd1;
 			OP_IMM : begin
@@ -32,13 +36,28 @@ module decoder(
 			   		reg_wr = 1'd1;
 					alu_src = 1'd1;
 					mem_rd = 1'd1;
-					mem_to_reg = 1'd1;
+					mem_to_reg = 2'd1;
 			       end
 			STORE : begin
 		 			alu_src = 1'd1;
 					mem_wr = 1'd1;
 				end
-			BRANCH : branch = 1'd1;		
+			BRANCH : branch = 1'd1;
+			LUI : begin
+					reg_wr = 1'd1;
+					mem_to_reg = 2'd3;
+			      end
+		      	JAL, JALR : begin
+			   		reg_wr = 1'd1;
+					alu_src = 1'd1;
+					jump = 1'd1;
+					mem_to_reg = 2'd2;
+				    end
+			AUIPC : begin
+		    			reg_wr = 1'd1;
+					alu_src = 1'd1;
+					alu_a = 1'd1;
+				end		
 		endcase
 	end
 
@@ -68,7 +87,7 @@ module decoder(
 						3'b010 : alu_op = ALU_SLT;
 					endcase
 				end
-		      LOAD, STORE : alu_op = ALU_ADD;
+		      LOAD, STORE, AUIPC, JALR : alu_op = ALU_ADD;
 		      BRANCH : alu_op = ALU_SUB;
 		endcase
 	end

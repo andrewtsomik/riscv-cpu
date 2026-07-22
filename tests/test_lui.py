@@ -3,7 +3,7 @@ from cocotb.triggers import RisingEdge, Timer
 from cocotb.clock import Clock
 
 @cocotb.test()
-async def test_branch_top(dut):
+async def test_lui(dut):
     cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
 
     dut.rst.value = 1
@@ -18,8 +18,6 @@ async def test_branch_top(dut):
     reg = dut.reg_inst.registers
 
     x5 = int(reg[5].value)
-    x6 = int(reg[6].value)
-    x8 = int(reg[8].value)
     
     for i in range(20):
         await RisingEdge(dut.clk)
@@ -27,14 +25,10 @@ async def test_branch_top(dut):
         pc = int(dut.pc_out.value)
         instruct = int(dut.instruct.value)
         dut._log.info(f"Cycle {i}: PC={pc:#x} instruct={instruct:#010x} "
-                      f"x5={int(dut.reg_inst.registers[5].value)} "
-                      f"x6={int(dut.reg_inst.registers[6].value)} "
-                      f"x8={int(dut.reg_inst.registers[8].value)}")
+                      f"x5={int(dut.reg_inst.registers[5].value)} ")
 
-    dut._log.info(f"x5 = {x5} x6 = {x6} x8 = {x8}")
+    dut._log.info(f"x5 = {x5}")
 
-    assert x5 == 0, f"x5 = {x5}, expected 0"
-    assert x6 == 6, f"x6 = {x6}, expected 6"
-    assert x8 == 42, f"x8 = {x8}, expected 42"
+    assert x5 == 0x12345000, f"x5 = {x5}, expected 0x12345000"
 
-    dut._log.info("bne works")
+    dut._log.info("lui works")
