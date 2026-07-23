@@ -1,6 +1,0 @@
-<testsuites name="results">
-  <testsuite name="all" package="all">
-    <property name="random_seed" value="1784772716" />
-    <testcase name="test_cpu_top" classname="test_piped_cpu" file="/home/atsomik/riscv-cpu/tests/test_piped_cpu.py" lineno="5" time="0.003825664520263672" sim_time_ns="211.0" ratio_time="55153.8167767668" />
-  </testsuite>
-</testsuites>

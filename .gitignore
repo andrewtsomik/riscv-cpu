@@ -1,0 +1,11 @@
+#CocoTB/Icarus Artifacts
+sim_build/
+results.xml
+*.vcd
+*.vvp
+*.fst
+
+#Python
+__pycache__/
+*.pyc
+.pytest_cache/
