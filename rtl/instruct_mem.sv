@@ -7,7 +7,7 @@ module instruct_mem(
 	initial begin
 		for(int i = 0; i < 1024; i++)
 			arr[i] = 32'd0;
-		$readmemh("../programs/hazard.hex", arr);	
+		$readmemh("../programs/stall.hex", arr);	
 	end
 
 	assign instruct = arr[addr[11:2]];

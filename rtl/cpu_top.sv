@@ -31,11 +31,13 @@ module cpu_top(
 	logic [31:0] ex_mem_fwd_val, fwd_rd_addr1, fwd_rd_addr2;
 	logic [1:0] forward_a, forward_b;
 
+	logic stall;
+
 	//Stage 1: Fetch
 	always_ff @(posedge clk or posedge rst) begin
 		if(rst)
 			pc <= '0;
-		else
+		else if(!stall)
 			pc <= pc_next;
 	end
 
@@ -50,7 +52,7 @@ module cpu_top(
 	always_ff @(posedge clk or posedge rst) begin
 		if(rst)
 			if_id_reg <= '0;
-		else
+		else if(!stall)
 			if_id_reg <= if_id_next;
 	end
 
@@ -79,9 +81,12 @@ module cpu_top(
 	assign id_ex_next.imm_out = imm_out;
 	assign id_ex_next.pc = if_id_reg.pc;
 	assign id_ex_next.pc_plus4 = if_id_reg.pc_plus4;
+	assign stall = id_ex_reg.mem_rd && (id_ex_reg.wr_addr != 0) && (id_ex_reg.wr_addr == if_id_reg.instruct[19:15] || id_ex_reg.wr_addr == if_id_reg.instruct[24:20]);
 
 	always_ff @(posedge clk or posedge rst) begin
 		if(rst)
+			id_ex_reg <= '0;
+		else if(stall)
 			id_ex_reg <= '0;
 		else
 			id_ex_reg <= id_ex_next;

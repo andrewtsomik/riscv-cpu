@@ -4,6 +4,6 @@ TOPLEVEL_LANG ?= verilog
 VERILOG_SOURCES += ../rtl/risc_pkg.sv ../rtl/register_file.sv ../rtl/instruct_mem.sv ../rtl/decoder.sv ../rtl/immediate_gen.sv ../rtl/alu.sv ../rtl/data_mem.sv ../rtl/cpu_top.sv
 
 TOPLEVEL = cpu_top
-MODULE = test_hazard_piped_cpu
+MODULE = test_stall_cpu
 
 include $(shell cocotb-config --makefiles)/Makefile.sim
