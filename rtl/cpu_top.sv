@@ -28,6 +28,9 @@ module cpu_top(
 	mem_wb_t mem_wb_next;
 	logic [31:0] pc;
 
+	logic [31:0] ex_mem_fwd_val, fwd_rd_addr1, fwd_rd_addr2;
+	logic [1:0] forward_a, forward_b;
+
 	//Stage 1: Fetch
 	always_ff @(posedge clk or posedge rst) begin
 		if(rst)
@@ -85,8 +88,8 @@ module cpu_top(
 	end
 
 	//Stage 3: Execute
-	assign alu_a_val = id_ex_reg.alu_a ? id_ex_reg.pc : id_ex_reg.rd_dt1;
-	assign alu_b = id_ex_reg.alu_src ? id_ex_reg.imm_out : id_ex_reg.rd_dt2;
+	assign alu_a_val = id_ex_reg.alu_a ? id_ex_reg.pc : fwd_rd_addr1;
+	assign alu_b = id_ex_reg.alu_src ? id_ex_reg.imm_out : fwd_rd_addr2;
 
 	alu alu_inst(.o1(alu_a_val), .o2(alu_b), .oper(id_ex_reg.alu_op), .result(alu_result), .zero(alu_zero), .lt_signed(lt_signed), .lt_unsigned(lt_unsigned));
 
@@ -105,7 +108,7 @@ module cpu_top(
 	assign jump_target = id_ex_reg.jalr ? alu_result : branch_target;
 
 	assign ex_mem_next.alu_result = alu_result;
-	assign ex_mem_next.rd_dt2 = id_ex_reg.rd_dt2;
+	assign ex_mem_next.rd_dt2 = fwd_rd_addr2;
 	assign ex_mem_next.mem_rd = id_ex_reg.mem_rd;
 	assign ex_mem_next.mem_wr = id_ex_reg.mem_wr;
 	assign ex_mem_next.reg_wr = id_ex_reg.reg_wr;
@@ -119,6 +122,47 @@ module cpu_top(
 			ex_mem_reg <= '0;
 		else
 			ex_mem_reg <= ex_mem_next;
+	end
+
+	always_comb begin
+		case(ex_mem_reg.mem_to_reg)
+			2'd0 : ex_mem_fwd_val = ex_mem_reg.alu_result;
+			2'd2 : ex_mem_fwd_val = ex_mem_reg.pc_plus4;
+			2'd3 : ex_mem_fwd_val = ex_mem_reg.imm_out;
+			default : ex_mem_fwd_val = ex_mem_reg.alu_result;
+		endcase
+	end
+
+	always_comb begin
+		if(ex_mem_reg.reg_wr && ex_mem_reg.wr_addr != 0 && ex_mem_reg.wr_addr == id_ex_reg.rd_addr1)
+			forward_a = 2'd2;
+		else if(mem_wb_reg.reg_wr && mem_wb_reg.wr_addr != 0 && mem_wb_reg.wr_addr == id_ex_reg.rd_addr1)
+			forward_a = 2'd1;
+		else
+			forward_a = 2'd0;
+
+		if(ex_mem_reg.reg_wr && ex_mem_reg.wr_addr != 0 && ex_mem_reg.wr_addr == id_ex_reg.rd_addr2)
+			forward_b = 2'd2;
+		else if(mem_wb_reg.reg_wr && mem_wb_reg.wr_addr != 0 && mem_wb_reg.wr_addr == id_ex_reg.rd_addr2)
+			forward_b = 2'd1;
+		else
+			forward_b = 2'd0;
+	end
+
+	always_comb begin
+		case(forward_a)
+			2'd0 : fwd_rd_addr1 = id_ex_reg.rd_dt1;
+			2'd1 : fwd_rd_addr1 = wr_dt;
+			2'd2 : fwd_rd_addr1 = ex_mem_fwd_val;
+			default : fwd_rd_addr1 = id_ex_reg.rd_dt1;
+		endcase
+
+		case(forward_b)
+			2'd0 : fwd_rd_addr2 = id_ex_reg.rd_dt2;
+			2'd1 : fwd_rd_addr2 = wr_dt;
+			2'd2 : fwd_rd_addr2 = ex_mem_fwd_val;
+			default : fwd_rd_addr2 = id_ex_reg.rd_dt2;
+		endcase
 	end
 
 	//Stage 4: Memory
