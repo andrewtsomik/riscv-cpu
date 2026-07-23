@@ -32,6 +32,7 @@ module cpu_top(
 	logic [1:0] forward_a, forward_b;
 
 	logic stall;
+	logic flush;
 
 	//Stage 1: Fetch
 	always_ff @(posedge clk or posedge rst) begin
@@ -51,6 +52,8 @@ module cpu_top(
 
 	always_ff @(posedge clk or posedge rst) begin
 		if(rst)
+			if_id_reg <= '0;
+		else if(flush)
 			if_id_reg <= '0;
 		else if(!stall)
 			if_id_reg <= if_id_next;
@@ -86,7 +89,7 @@ module cpu_top(
 	always_ff @(posedge clk or posedge rst) begin
 		if(rst)
 			id_ex_reg <= '0;
-		else if(stall)
+		else if(stall || flush)
 			id_ex_reg <= '0;
 		else
 			id_ex_reg <= id_ex_next;
@@ -111,6 +114,7 @@ module cpu_top(
 		endcase
 	end
 	assign jump_target = id_ex_reg.jalr ? alu_result : branch_target;
+	assign flush = id_ex_reg.jump || (id_ex_reg.branch && cond);
 
 	assign ex_mem_next.alu_result = alu_result;
 	assign ex_mem_next.rd_dt2 = fwd_rd_addr2;

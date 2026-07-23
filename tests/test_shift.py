@@ -11,11 +11,23 @@ async def test_shifts(dut):
     await RisingEdge(dut.clk)
     dut.rst.value = 0
 
-    for c in range(10):
+    for i in range(20):
         await RisingEdge(dut.clk)
-
-    await Timer(1, unit="ns")
-
+        await Timer(1, unit="ns")
+        r = dut.reg_inst.registers
+        pc = int(dut.pc.value)
+        instruct = int(dut.instruct.value)
+        dut._log.info(f"Cycle {i}: PC={int(dut.pc.value):#x} instruct={int(dut.instruct.value):#010x} "
+                      f"x5={int(r[5].value)} "
+                      f"x6={int(r[6].value)} "
+                      f"x7={int(r[7].value)} "
+                      f"x8={int(r[8].value)} "
+                      f"x9={int(r[9].value)} "
+                      f"x10={int(r[10].value)} "
+                      f"x11={int(r[11].value)} "
+                      f"x12={int(r[12].value)} "
+                      f"x13={int(r[13].value)} "
+                      f"x14={int(r[14].value)}")
     reg = dut.reg_inst.registers
 
     x5 = int(reg[5].value)
@@ -28,23 +40,7 @@ async def test_shifts(dut):
     x12 = int(reg[12].value)
     x13 = int(reg[13].value)
     x14 = int(reg[14].value)
-    
-    for i in range(10):
-        await RisingEdge(dut.clk)
-        await Timer(1, unit="ns")
-        pc = int(dut.pc_out.value)
-        instruct = int(dut.instruct.value)
-        dut._log.info(f"Cycle {i}: PC={pc:#x} instruct={instruct:#010x} "
-                      f"x5={int(dut.reg_inst.registers[5].value)} "
-                      f"x6={int(dut.reg_inst.registers[6].value)} "
-                      f"x7={int(dut.reg_inst.registers[7].value)} "
-                      f"x8={int(dut.reg_inst.registers[8].value)} "
-                      f"x9={int(dut.reg_inst.registers[9].value)} "
-                      f"x10={int(dut.reg_inst.registers[10].value)} "
-                      f"x11={int(dut.reg_inst.registers[11].value)} "
-                      f"x12={int(dut.reg_inst.registers[12].value)} "
-                      f"x13={int(dut.reg_inst.registers[13].value)} "
-                      f"x14={int(dut.reg_inst.registers[14].value)}")
+
 
     dut._log.info(f"x5 = {x5} x6 = {x6} x7 = {x7} x8 = {x8} x9 = {x9} x10 = {x10} x11 = {x11} x12={x12} x13={x13} x14={x14}")
 
