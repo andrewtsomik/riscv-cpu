@@ -5,34 +5,96 @@ module cpu_top(
 	input logic rst	
 );
 
-	logic [31:0] pc_next, pc_out, pc_plus4, branch_target;
+	logic [31:0] pc_next, pc_plus4, branch_target;
 	logic [31:0] instruct;
 	logic [31:0] rd_dt1, rd_dt2, imm_out;
 	logic [31:0] alu_b, alu_result, wr_dt, mem_rd_dt;
 	logic [31:0] alu_a_val, jump_target;
 	logic alu_zero, lt_signed, lt_unsigned;
 
-	logic reg_wr, alu_src, mem_rd, mem_wr, branch, jump, alu_a;
+	logic reg_wr, alu_src, mem_rd, mem_wr, branch, jump, alu_a, jalr;
+	logic [2:0] branch_op;
 	logic [1:0] mem_to_reg;
 	logic cond;
 	alu_ops_e alu_op;
-	opcodes_e opcode;
 
-	pc_register pc_inst(.clk(clk), .rst(rst), .pc_next(pc_next), .pc_out(pc_out));
-	instruct_mem instr_mem_inst(.addr(pc_out), .instruct(instruct));
-	register_file reg_inst(.rd_addr1(instruct[19:15]), .rd_addr2(instruct[24:20]), .wr_addr(instruct[11:7]), .wr_dt(wr_dt), .clk(clk), .wr_en(reg_wr), .rd_dt1(rd_dt1), .rd_dt2(rd_dt2));
-	decoder decoder_inst(.instruct(instruct), .reg_wr(reg_wr), .alu_src(alu_src), .mem_rd(mem_rd), .mem_wr(mem_wr), .mem_to_reg(mem_to_reg), .branch(branch), .jump(jump), .alu_a(alu_a), .alu_op(alu_op));
-	immediate_gen gen_inst(.instruct(instruct), .imm_out(imm_out));
-	alu alu_inst(.o1(alu_a_val), .o2(alu_b), .oper(alu_op), .result(alu_result), .zero(alu_zero), .lt_signed(lt_signed), .lt_unsigned(lt_unsigned));
-	data_mem data_mem_inst(.clk(clk), .mem_addr(alu_result), .mem_wr_dt(rd_dt2), .mem_wr(mem_wr), .mem_rd(mem_rd), .mem_rd_dt(mem_rd_dt));
+	if_id_t if_id_reg;
+	if_id_t if_id_next;
+	id_ex_t id_ex_reg;
+	id_ex_t id_ex_next;
+	ex_mem_t ex_mem_reg;
+	ex_mem_t ex_mem_next;
+	mem_wb_t mem_wb_reg;
+	mem_wb_t mem_wb_next;
+	logic [31:0] pc;
 
-	assign pc_plus4 = pc_out + 32'd4;
-	assign branch_target = pc_out + imm_out;
-	assign opcode = opcodes_e'(instruct[6:0]);
+	//Stage 1: Fetch
+	always_ff @(posedge clk or posedge rst) begin
+		if(rst)
+			pc <= '0;
+		else
+			pc <= pc_next;
+	end
+
+	instruct_mem instruct_mem_inst(.addr(pc), .instruct(instruct));
+
+	assign pc_plus4 = pc + 32'd4;
+	assign pc_next = id_ex_reg.jump ? jump_target : ((id_ex_reg.branch & cond) ? branch_target : pc_plus4);
+	assign if_id_next.instruct = instruct;
+	assign if_id_next.pc = pc;
+	assign if_id_next.pc_plus4 = pc_plus4;
+
+	always_ff @(posedge clk or posedge rst) begin
+		if(rst)
+			if_id_reg <= '0;
+		else
+			if_id_reg <= if_id_next;
+	end
+
+	//Stage 2: Decode
+	decoder decoder_inst(.instruct(if_id_reg.instruct), .reg_wr(reg_wr), .alu_src(alu_src), .mem_rd(mem_rd), .mem_wr(mem_wr), .mem_to_reg(mem_to_reg), .branch(branch), .jump(jump), .alu_a(alu_a), .alu_op(alu_op), .branch_op(branch_op
+	), .jalr(jalr));
+	register_file reg_inst(.rd_addr1(if_id_reg.instruct[19:15]), .rd_addr2(if_id_reg.instruct[24:20]), .wr_addr(mem_wb_reg.wr_addr), .wr_dt(wr_dt), .clk(clk), .wr_en(mem_wb_reg.reg_wr), .rd_dt1(rd_dt1), .rd_dt2(rd_dt2));
+	immediate_gen gen_inst(.instruct(if_id_reg.instruct), .imm_out(imm_out));
+
+	assign id_ex_next.reg_wr = reg_wr;
+	assign id_ex_next.alu_src = alu_src;
+	assign id_ex_next.mem_rd = mem_rd;
+	assign id_ex_next.mem_wr = mem_wr;
+	assign id_ex_next.mem_to_reg = mem_to_reg;
+	assign id_ex_next.branch = branch;
+	assign id_ex_next.jump = jump;
+	assign id_ex_next.alu_a = alu_a;
+	assign id_ex_next.alu_op = alu_op;
+	assign id_ex_next.branch_op = branch_op;
+	assign id_ex_next.jalr = jalr;
+	assign id_ex_next.rd_addr1 = if_id_reg.instruct[19:15];
+	assign id_ex_next.rd_addr2 = if_id_reg.instruct[24:20];
+	assign id_ex_next.wr_addr = if_id_reg.instruct[11:7];
+	assign id_ex_next.rd_dt1 = rd_dt1;
+	assign id_ex_next.rd_dt2 = rd_dt2;
+	assign id_ex_next.imm_out = imm_out;
+	assign id_ex_next.pc = if_id_reg.pc;
+	assign id_ex_next.pc_plus4 = if_id_reg.pc_plus4;
+
+	always_ff @(posedge clk or posedge rst) begin
+		if(rst)
+			id_ex_reg <= '0;
+		else
+			id_ex_reg <= id_ex_next;
+	end
+
+	//Stage 3: Execute
+	assign alu_a_val = id_ex_reg.alu_a ? id_ex_reg.pc : id_ex_reg.rd_dt1;
+	assign alu_b = id_ex_reg.alu_src ? id_ex_reg.imm_out : id_ex_reg.rd_dt2;
+
+	alu alu_inst(.o1(alu_a_val), .o2(alu_b), .oper(id_ex_reg.alu_op), .result(alu_result), .zero(alu_zero), .lt_signed(lt_signed), .lt_unsigned(lt_unsigned));
+
+	assign branch_target = id_ex_reg.pc + id_ex_reg.imm_out;
 	always_comb begin
-		case(instruct[14:12])
+		case(id_ex_reg.branch_op)
 			3'd0 : cond = alu_zero;
-	        	3'd1 : cond = ~alu_zero;
+			3'd1 : cond = ~alu_zero;
 			3'd4 : cond = lt_signed;
 			3'd5 : cond = ~lt_signed;
 			3'd6 : cond = lt_unsigned;
@@ -40,17 +102,51 @@ module cpu_top(
 			default : cond = 1'b0;
 		endcase
 	end
-	assign pc_next = jump ? jump_target : ((branch & cond) ? branch_target : pc_plus4);
-	assign alu_b = alu_src ? imm_out : rd_dt2;
-	assign alu_a_val = alu_a ? pc_out : rd_dt1;
-	assign jump_target = (opcode == JALR) ? alu_result : branch_target;
+	assign jump_target = id_ex_reg.jalr ? alu_result : branch_target;
+
+	assign ex_mem_next.alu_result = alu_result;
+	assign ex_mem_next.rd_dt2 = id_ex_reg.rd_dt2;
+	assign ex_mem_next.mem_rd = id_ex_reg.mem_rd;
+	assign ex_mem_next.mem_wr = id_ex_reg.mem_wr;
+	assign ex_mem_next.reg_wr = id_ex_reg.reg_wr;
+	assign ex_mem_next.mem_to_reg = id_ex_reg.mem_to_reg;
+	assign ex_mem_next.wr_addr = id_ex_reg.wr_addr;
+	assign ex_mem_next.pc_plus4 = id_ex_reg.pc_plus4;
+	assign ex_mem_next.imm_out = id_ex_reg.imm_out;
+
+	always_ff @(posedge clk or posedge rst) begin
+		if(rst)
+			ex_mem_reg <= '0;
+		else
+			ex_mem_reg <= ex_mem_next;
+	end
+
+	//Stage 4: Memory
+	data_mem data_mem_inst(.clk(clk), .mem_addr(ex_mem_reg.alu_result), .mem_wr_dt(ex_mem_reg.rd_dt2), .mem_wr(ex_mem_reg.mem_wr), .mem_rd(ex_mem_reg.mem_rd), .mem_rd_dt(mem_rd_dt));
+
+	assign mem_wb_next.mem_rd_dt = mem_rd_dt;
+	assign mem_wb_next.alu_result = ex_mem_reg.alu_result;
+	assign mem_wb_next.pc_plus4 = ex_mem_reg.pc_plus4;
+	assign mem_wb_next.imm_out = ex_mem_reg.imm_out;
+	assign mem_wb_next.mem_to_reg = ex_mem_reg.mem_to_reg;
+	assign mem_wb_next.reg_wr = ex_mem_reg.reg_wr;
+	assign mem_wb_next.wr_addr = ex_mem_reg.wr_addr;
+
+	always_ff @(posedge clk or posedge rst) begin
+		if(rst)
+			mem_wb_reg <= '0;
+		else
+			mem_wb_reg <= mem_wb_next;
+	end
+
+	//Stage 5: Write-back
 	always_comb begin
-		case(mem_to_reg)
-			2'd0 : wr_dt = alu_result;
-			2'd1 : wr_dt = mem_rd_dt;
-			2'd2 : wr_dt = pc_plus4;
-			2'd3 : wr_dt = imm_out;
-			default : wr_dt = alu_result;
-		endcase		
-	end	
+		case(mem_wb_reg.mem_to_reg)
+			2'd0 : wr_dt = mem_wb_reg.alu_result;
+			2'd1 : wr_dt = mem_wb_reg.mem_rd_dt;
+			2'd2 : wr_dt = mem_wb_reg.pc_plus4;
+			2'd3 : wr_dt = mem_wb_reg.imm_out;
+			default : wr_dt = mem_wb_reg.alu_result;
+		endcase
+	end
 endmodule

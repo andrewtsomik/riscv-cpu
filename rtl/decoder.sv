@@ -11,12 +11,14 @@ module decoder(
 	output logic branch,
 	output logic jump,
 	output logic alu_a,
-	output alu_ops_e alu_op
+	output alu_ops_e alu_op,
+
+	output logic [2:0] branch_op,
+	output logic jalr
 );
 
 	opcodes_e opcode;
         assign opcode = opcodes_e'(instruct[6:0]); 
-
 	always_comb begin
 		reg_wr = 1'd0;
 		alu_src = 1'd0;
@@ -26,6 +28,8 @@ module decoder(
 		branch = 1'd0;
 		jump = 1'd0;
 		alu_a = 1'd0;
+		branch_op = 3'd0;
+		jalr = 1'd0;
 		case(opcode)
 			OP : reg_wr = 1'd1;
 			OP_IMM : begin
@@ -42,17 +46,27 @@ module decoder(
 		 			alu_src = 1'd1;
 					mem_wr = 1'd1;
 				end
-			BRANCH : branch = 1'd1;
+			BRANCH : begin
+					branch = 1'd1;
+					branch_op = instruct[14:12];
+				 end
 			LUI : begin
 					reg_wr = 1'd1;
 					mem_to_reg = 2'd3;
 			      end
-		      	JAL, JALR : begin
+		      	JAL : begin
 			   		reg_wr = 1'd1;
 					alu_src = 1'd1;
 					jump = 1'd1;
 					mem_to_reg = 2'd2;
-				    end
+			      end
+			JALR : begin
+					reg_wr = 1'd1;
+					alu_src = 1'd1;
+					jump = 1'd1;
+					mem_to_reg = 2'd2;
+					jalr = 1'd1;
+			       end
 			AUIPC : begin
 		    			reg_wr = 1'd1;
 					alu_src = 1'd1;

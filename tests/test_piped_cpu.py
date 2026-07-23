@@ -26,7 +26,7 @@ async def test_cpu_top(dut):
     for i in range(10):
         await RisingEdge(dut.clk)
         await Timer(1, unit="ns")
-        pc = int(dut.pc_out.value)
+        pc = int(dut.pc.value)
         instruct = int(dut.instruct.value)
         dut._log.info(f"Cycle {i}: PC={pc:#x} instruct={instruct:#010x} "
                       f"x5={int(dut.reg_inst.registers[5].value)} "
@@ -40,4 +40,4 @@ async def test_cpu_top(dut):
     assert x7 == 9, f"x7 = {x7}, expected 9"
     assert x8 == 42, f"x8 = {x8}, expected 42"
 
-    dut._log.info("CPU integration tests passed")
+    dut._log.info("CPU piping tests passed")

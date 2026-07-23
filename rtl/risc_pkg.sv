@@ -27,7 +27,7 @@ package risc_pkg;
 	typedef struct packed {
 		logic [31:0] instruct;
 		logic [31:0] pc;
-		logic [31:0] pcplus4;
+		logic [31:0] pc_plus4;
 	} if_id_t;
 
 	typedef struct packed {
@@ -37,10 +37,11 @@ package risc_pkg;
 		logic [4:0] wr_addr;
 		logic [31:0] rd_dt1;
 		logic [31:0] rd_dt2;
-		logic alu_src, alu_a, mem_rd, mem_wr, reg_wr, branch, jump;
+		logic alu_src, alu_a, mem_rd, mem_wr, reg_wr, branch, jump, jalr;
+		logic [2:0] branch_op;
 		logic [1:0] mem_to_reg;
 		logic [31:0] pc;
-		logic [31:0] pcplus4;
+		logic [31:0] pc_plus4;
 		alu_ops_e alu_op;
 	} id_ex_t;
 
@@ -50,13 +51,13 @@ package risc_pkg;
 		logic mem_rd, mem_wr, reg_wr;
 		logic [1:0] mem_to_reg;
 		logic [4:0] wr_addr;
-		logic [31:0] pcplus4;
+		logic [31:0] pc_plus4;
 		logic [31:0] imm_out;
 	} ex_mem_t;
 
 	typedef struct packed {
 		logic [31:0] imm_out;
-		logic [31:0] pcplus4;
+		logic [31:0] pc_plus4;
 		logic [31:0] mem_rd_dt;
 		logic [31:0] alu_result;
 		logic [4:0] wr_addr;
