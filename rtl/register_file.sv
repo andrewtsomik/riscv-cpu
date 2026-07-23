@@ -22,6 +22,6 @@ module register_file(
 			registers[wr_addr] <= wr_dt;
 	end
 
-	assign rd_dt1 = (rd_addr1 == 5'd0) ? 32'd0 : registers[rd_addr1];
-	assign rd_dt2 = (rd_addr2 == 5'd0) ? 32'd0 : registers[rd_addr2];
+	assign rd_dt1 = (rd_addr1 == 5'd0) ? 32'd0 : ((wr_addr == rd_addr1 && wr_en) ? wr_dt : registers[rd_addr1]);
+	assign rd_dt2 = (rd_addr2 == 5'd0) ? 32'd0 : ((wr_addr == rd_addr2 && wr_en) ? wr_dt : registers[rd_addr2]);
 endmodule
