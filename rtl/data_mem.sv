@@ -12,14 +12,19 @@ module data_mem(
 	logic [31:0] sig [0:1023];
 	logic [3:0] byte_en;
 	logic [31:0] wr_dt_shifted;
+`ifndef SYNTHESIS
 	string hexfile;
-	
+`endif
 	initial begin
 		for(int i = 0; i < 1024; i++)
 			sig[i] = 32'd0;
+`ifdef SYNTHESIS
+	$readmemh("C:/riscv-fpga/program.hex", sig);
+`else
 		if(!$value$plusargs("HEX=%s", hexfile))
 			hexfile = "../programs/test.hex";
 		$readmemh(hexfile, sig);
+`endif
 	end
 		
 	assign mem_rd_dt = mem_rd ? sig[mem_addr[11:2]] : 32'd0;

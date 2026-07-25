@@ -9,7 +9,7 @@ module alu(
 	output logic lt_signed,
 	output logic lt_unsigned
 );
-	assign zero = (result == 32'd0);
+	assign zero = (o1 == o2);
 	assign lt_signed = $signed(o1) < $signed(o2);
 	assign lt_unsigned = o1 < o2;
 

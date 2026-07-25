@@ -2,7 +2,8 @@ import risc_pkg::*;
 
 module cpu_top(
 	input logic clk,
-	input logic rst	
+	input logic rst,
+	output logic [3:0] led	
 );
 
 	logic [31:0] pc_next, pc_plus4, branch_target;
@@ -220,4 +221,6 @@ module cpu_top(
 			default : wr_dt = mem_wb_reg.alu_result;
 		endcase
 	end
+
+	assign led = wr_dt[3:0];
 endmodule
