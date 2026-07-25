@@ -3,7 +3,8 @@ import risc_pkg::*;
 module cpu_top(
 	input logic clk,
 	input logic rst,
-	output logic [3:0] led	
+	output logic [3:0] led,
+	output logic uart_tx	
 );
 
 	logic [31:0] pc_next, pc_plus4, branch_target;
@@ -36,6 +37,10 @@ module cpu_top(
 
 	logic stall;
 	logic flush;
+
+	logic [7:0] uart_dt;
+	logic uart_send;
+	logic uart_busy;
 
 	//Stage 1: Fetch
 	always_ff @(posedge clk or posedge rst) begin
@@ -222,5 +227,23 @@ module cpu_top(
 		endcase
 	end
 
+	//UART
+	
+	assign uart_dt = wr_dt[7:0];
+
+	logic [23:0] send_timer;
+	always_ff @(posedge clk or posedge rst) begin
+		if(rst) begin
+		 	send_timer <= '0;
+			uart_send <= 1'b0;
+		end
+		else begin
+			send_timer <= send_timer + 1;
+			uart_send <= (send_timer == '1) && !uart_busy;
+		end	
+	end
+
+	uart uart_inst(.clk(clk), .rst(rst), .data(uart_dt), .send(uart_send), .busy(uart_busy), .tx(uart_tx));
+	
 	assign led = wr_dt[3:0];
 endmodule
