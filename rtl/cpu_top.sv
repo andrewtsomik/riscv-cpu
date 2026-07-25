@@ -14,6 +14,7 @@ module cpu_top(
 
 	logic reg_wr, alu_src, mem_rd, mem_wr, branch, jump, alu_a, jalr;
 	logic [2:0] branch_op;
+	logic [2:0] mem_size;
 	logic [1:0] mem_to_reg;
 	logic cond;
 	alu_ops_e alu_op;
@@ -30,6 +31,7 @@ module cpu_top(
 
 	logic [31:0] ex_mem_fwd_val, fwd_rd_addr1, fwd_rd_addr2;
 	logic [1:0] forward_a, forward_b;
+	logic [31:0] mem_rd_shifted, mem_rd_ext;
 
 	logic stall;
 	logic flush;
@@ -61,7 +63,7 @@ module cpu_top(
 
 	//Stage 2: Decode
 	decoder decoder_inst(.instruct(if_id_reg.instruct), .reg_wr(reg_wr), .alu_src(alu_src), .mem_rd(mem_rd), .mem_wr(mem_wr), .mem_to_reg(mem_to_reg), .branch(branch), .jump(jump), .alu_a(alu_a), .alu_op(alu_op), .branch_op(branch_op
-	), .jalr(jalr));
+	), .jalr(jalr), .mem_size(mem_size));
 	register_file reg_inst(.rd_addr1(if_id_reg.instruct[19:15]), .rd_addr2(if_id_reg.instruct[24:20]), .wr_addr(mem_wb_reg.wr_addr), .wr_dt(wr_dt), .clk(clk), .wr_en(mem_wb_reg.reg_wr), .rd_dt1(rd_dt1), .rd_dt2(rd_dt2));
 	immediate_gen gen_inst(.instruct(if_id_reg.instruct), .imm_out(imm_out));
 
@@ -76,6 +78,7 @@ module cpu_top(
 	assign id_ex_next.alu_op = alu_op;
 	assign id_ex_next.branch_op = branch_op;
 	assign id_ex_next.jalr = jalr;
+	assign id_ex_next.mem_size = mem_size;
 	assign id_ex_next.rd_addr1 = if_id_reg.instruct[19:15];
 	assign id_ex_next.rd_addr2 = if_id_reg.instruct[24:20];
 	assign id_ex_next.wr_addr = if_id_reg.instruct[11:7];
@@ -121,6 +124,7 @@ module cpu_top(
 	assign ex_mem_next.mem_rd = id_ex_reg.mem_rd;
 	assign ex_mem_next.mem_wr = id_ex_reg.mem_wr;
 	assign ex_mem_next.reg_wr = id_ex_reg.reg_wr;
+	assign ex_mem_next.mem_size = id_ex_reg.mem_size;
 	assign ex_mem_next.mem_to_reg = id_ex_reg.mem_to_reg;
 	assign ex_mem_next.wr_addr = id_ex_reg.wr_addr;
 	assign ex_mem_next.pc_plus4 = id_ex_reg.pc_plus4;
@@ -175,15 +179,29 @@ module cpu_top(
 	end
 
 	//Stage 4: Memory
-	data_mem data_mem_inst(.clk(clk), .mem_addr(ex_mem_reg.alu_result), .mem_wr_dt(ex_mem_reg.rd_dt2), .mem_wr(ex_mem_reg.mem_wr), .mem_rd(ex_mem_reg.mem_rd), .mem_rd_dt(mem_rd_dt));
+	data_mem data_mem_inst(.clk(clk), .mem_addr(ex_mem_reg.alu_result), .mem_wr_dt(ex_mem_reg.rd_dt2), .mem_wr(ex_mem_reg.mem_wr), .mem_rd(ex_mem_reg.mem_rd), .mem_size(ex_mem_reg.mem_size), .mem_rd_dt(mem_rd_dt));
 
-	assign mem_wb_next.mem_rd_dt = mem_rd_dt;
+	assign mem_rd_shifted = mem_rd_dt >> {ex_mem_reg.alu_result[1:0], 3'b000};
+
 	assign mem_wb_next.alu_result = ex_mem_reg.alu_result;
 	assign mem_wb_next.pc_plus4 = ex_mem_reg.pc_plus4;
 	assign mem_wb_next.imm_out = ex_mem_reg.imm_out;
 	assign mem_wb_next.mem_to_reg = ex_mem_reg.mem_to_reg;
 	assign mem_wb_next.reg_wr = ex_mem_reg.reg_wr;
 	assign mem_wb_next.wr_addr = ex_mem_reg.wr_addr;
+	
+	always_comb begin
+		case(ex_mem_reg.mem_size)
+			3'd0 : mem_rd_ext = {{24{mem_rd_shifted[7]}}, mem_rd_shifted[7:0]};
+			3'd1 : mem_rd_ext = {{16{mem_rd_shifted[15]}}, mem_rd_shifted[15:0]};
+			3'd2 : mem_rd_ext = mem_rd_dt;
+			3'd4 : mem_rd_ext = {24'd0, mem_rd_shifted[7:0]};
+			3'd5 : mem_rd_ext = {16'd0, mem_rd_shifted[15:0]};
+			default : mem_rd_ext = mem_rd_dt;
+		endcase
+	end
+
+	assign mem_wb_next.mem_rd_dt = mem_rd_ext;
 
 	always_ff @(posedge clk or posedge rst) begin
 		if(rst)

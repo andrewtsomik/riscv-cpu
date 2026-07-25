@@ -1,3 +1,6 @@
+#!/bin/bash
+
+echo "===CPU-Level Tests==="
 for pair in "branch:test_allbranch" \
 	    "shift:test_shift" \
 	    "lui:test_lui" \
@@ -11,3 +14,5 @@ for pair in "branch:test_allbranch" \
 	printf "%-26s " "$mod"
 	make MODULE=$mod PLUSARGS=+HEX=../programs/$hex.hex 2>&1 | grep -q "PASS=1 FAIL=0" && echo PASS || echo FAIL
 done
+
+rm -rf sim_build

@@ -9,7 +9,7 @@ module instruct_mem(
 		for(int i = 0; i < 1024; i++)
 			arr[i] = 32'd0;
 		if (!$value$plusargs("HEX=%s", hexfile))
-			hexfile = "..programs/test.hex";
+			hexfile = "../programs/test.hex";
 		$readmemh(hexfile, arr);	
 	end
 

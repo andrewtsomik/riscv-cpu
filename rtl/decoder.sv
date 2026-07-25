@@ -14,7 +14,8 @@ module decoder(
 	output alu_ops_e alu_op,
 
 	output logic [2:0] branch_op,
-	output logic jalr
+	output logic jalr,
+	output logic [2:0] mem_size
 );
 
 	opcodes_e opcode;
@@ -30,6 +31,7 @@ module decoder(
 		alu_a = 1'd0;
 		branch_op = 3'd0;
 		jalr = 1'd0;
+		mem_size = 3'd0;
 		case(opcode)
 			OP : reg_wr = 1'd1;
 			OP_IMM : begin
@@ -41,10 +43,12 @@ module decoder(
 					alu_src = 1'd1;
 					mem_rd = 1'd1;
 					mem_to_reg = 2'd1;
+					mem_size = instruct[14:12];
 			       end
 			STORE : begin
 		 			alu_src = 1'd1;
 					mem_wr = 1'd1;
+					mem_size = instruct[14:12];
 				end
 			BRANCH : begin
 					branch = 1'd1;
