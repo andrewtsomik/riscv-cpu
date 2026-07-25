@@ -1,4 +1,3 @@
-cd ~/riscv-cpu/tests
 for pair in "branch:test_allbranch" \
 	    "shift:test_shift" \
 	    "lui:test_lui" \
@@ -9,7 +8,6 @@ for pair in "branch:test_allbranch" \
 	    "stall:test_stall_cpu" \
 	    "piped:test_piped_cpu"; do
 	hex="${pair%%:*}"; mod="${pair##*:}"
-	cp ../programs/$hex.hex ../programs/test.hex
 	printf "%-26s " "$mod"
-	make MODULE=$mod 2>&1 | grep -q "PASS=1 FAIL=0" && echo PASS || echo FAIL
+	make MODULE=$mod PLUSARGS=+HEX=../programs/$hex.hex 2>&1 | grep -q "PASS=1 FAIL=0" && echo PASS || echo FAIL
 done
