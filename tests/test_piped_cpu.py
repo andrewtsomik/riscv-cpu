@@ -23,7 +23,7 @@ async def test_cpu_top(dut):
     x7 = int(reg[7].value)
     x8 = int(reg[8].value)
     
-    for i in range(10):
+    for i in range(500):
         await RisingEdge(dut.clk)
         await Timer(1, unit="ns")
         pc = int(dut.pc.value)

@@ -1,0 +1,56 @@
+
+/tmp/tmp.JNsw7KiVG1/lui.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text.init:
+
+00000000 <_start>:
+   0:	00000193          	li	gp,0
+
+00000004 <test_2>:
+   4:	00200193          	li	gp,2
+   8:	000000b7          	lui	ra,0x0
+   c:	00000393          	li	t2,0
+  10:	04709a63          	bne	ra,t2,64 <fail>
+
+00000014 <test_3>:
+  14:	00300193          	li	gp,3
+  18:	fffff0b7          	lui	ra,0xfffff
+  1c:	4010d093          	srai	ra,ra,0x1
+  20:	80000393          	li	t2,-2048
+  24:	04709063          	bne	ra,t2,64 <fail>
+
+00000028 <test_4>:
+  28:	00400193          	li	gp,4
+  2c:	7ffff0b7          	lui	ra,0x7ffff
+  30:	4140d093          	srai	ra,ra,0x14
+  34:	7ff00393          	li	t2,2047
+  38:	02709663          	bne	ra,t2,64 <fail>
+
+0000003c <test_5>:
+  3c:	00500193          	li	gp,5
+  40:	800000b7          	lui	ra,0x80000
+  44:	4140d093          	srai	ra,ra,0x14
+  48:	80000393          	li	t2,-2048
+  4c:	00709c63          	bne	ra,t2,64 <fail>
+
+00000050 <test_6>:
+  50:	00600193          	li	gp,6
+  54:	80000037          	lui	zero,0x80000
+  58:	00000393          	li	t2,0
+  5c:	00701463          	bne	zero,t2,64 <fail>
+  60:	00301463          	bne	zero,gp,68 <pass>
+
+00000064 <fail>:
+  64:	0000006f          	j	64 <fail>
+
+00000068 <pass>:
+  68:	00100193          	li	gp,1
+
+0000006c <pass_loop>:
+  6c:	0000006f          	j	6c <pass_loop>
+  70:	00000013          	nop
+  74:	00000013          	nop
+  78:	00000013          	nop
+  7c:	00000013          	nop
+  80:	00000013          	nop

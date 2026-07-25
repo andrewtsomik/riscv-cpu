@@ -1,0 +1,48 @@
+
+/tmp/tmp.B3Wt9ml3nc/auipc.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text.init:
+
+00000000 <_start>:
+   0:	00000193          	li	gp,0
+
+00000004 <test_2>:
+   4:	00200193          	li	gp,2
+   8:	00002517          	auipc	a0,0x2
+   c:	71c50513          	addi	a0,a0,1820 # 2724 <begin_signature+0x26a4>
+  10:	004005ef          	jal	a1,14 <test_2+0x10>
+  14:	40b50533          	sub	a0,a0,a1
+  18:	000023b7          	lui	t2,0x2
+  1c:	71038393          	addi	t2,t2,1808 # 2710 <begin_signature+0x2690>
+  20:	02751463          	bne	a0,t2,48 <fail>
+
+00000024 <test_3>:
+  24:	00300193          	li	gp,3
+  28:	ffffe517          	auipc	a0,0xffffe
+  2c:	8fc50513          	addi	a0,a0,-1796 # ffffd924 <begin_signature+0xffffd8a4>
+  30:	004005ef          	jal	a1,34 <test_3+0x10>
+  34:	40b50533          	sub	a0,a0,a1
+  38:	ffffe3b7          	lui	t2,0xffffe
+  3c:	8f038393          	addi	t2,t2,-1808 # ffffd8f0 <begin_signature+0xffffd870>
+  40:	00751463          	bne	a0,t2,48 <fail>
+  44:	00301463          	bne	zero,gp,4c <pass>
+
+00000048 <fail>:
+  48:	0000006f          	j	48 <fail>
+
+0000004c <pass>:
+  4c:	00100193          	li	gp,1
+
+00000050 <pass_loop>:
+  50:	0000006f          	j	50 <pass_loop>
+  54:	00000013          	nop
+  58:	00000013          	nop
+  5c:	00000013          	nop
+  60:	00000013          	nop
+  64:	00000013          	nop
+  68:	00000013          	nop
+  6c:	00000013          	nop
+  70:	00000013          	nop
+  74:	00000013          	nop
+  78:	00000013          	nop

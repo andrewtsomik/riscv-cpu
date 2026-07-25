@@ -1,0 +1,54 @@
+
+/tmp/tmp.mC2gMUjJIp/jal.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text.init:
+
+00000000 <_start>:
+   0:	00000193          	li	gp,0
+
+00000004 <test_2>:
+   4:	00200193          	li	gp,2
+   8:	00000093          	li	ra,0
+   c:	0100026f          	jal	tp,1c <target_2>
+
+00000010 <linkaddr_2>:
+  10:	00000013          	nop
+  14:	00000013          	nop
+  18:	0400006f          	j	58 <fail>
+
+0000001c <target_2>:
+  1c:	00000117          	auipc	sp,0x0
+  20:	ff410113          	addi	sp,sp,-12 # 10 <linkaddr_2>
+  24:	02411a63          	bne	sp,tp,58 <fail>
+
+00000028 <test_3>:
+  28:	00300193          	li	gp,3
+  2c:	00100093          	li	ra,1
+  30:	0140006f          	j	44 <test_3+0x1c>
+  34:	00108093          	addi	ra,ra,1
+  38:	00108093          	addi	ra,ra,1
+  3c:	00108093          	addi	ra,ra,1
+  40:	00108093          	addi	ra,ra,1
+  44:	00108093          	addi	ra,ra,1
+  48:	00108093          	addi	ra,ra,1
+  4c:	00300393          	li	t2,3
+  50:	00709463          	bne	ra,t2,58 <fail>
+  54:	00301463          	bne	zero,gp,5c <pass>
+
+00000058 <fail>:
+  58:	0000006f          	j	58 <fail>
+
+0000005c <pass>:
+  5c:	00100193          	li	gp,1
+
+00000060 <pass_loop>:
+  60:	0000006f          	j	60 <pass_loop>
+  64:	00000013          	nop
+  68:	00000013          	nop
+  6c:	00000013          	nop
+  70:	00000013          	nop
+  74:	00000013          	nop
+  78:	00000013          	nop
+  7c:	00000013          	nop
+  80:	00000013          	nop

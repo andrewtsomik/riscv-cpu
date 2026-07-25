@@ -1,0 +1,26 @@
+
+/tmp/tmp.PE1jvxvhUI/simple.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text.init:
+
+00000000 <_start>:
+   0:	00000193          	li	gp,0
+   4:	00100193          	li	gp,1
+
+00000008 <pass_loop>:
+   8:	0000006f          	j	8 <pass_loop>
+   c:	00000013          	nop
+  10:	00000013          	nop
+  14:	00000013          	nop
+  18:	00000013          	nop
+  1c:	00000013          	nop
+  20:	00000013          	nop
+  24:	00000013          	nop
+  28:	00000013          	nop
+  2c:	00000013          	nop
+  30:	00000013          	nop
+  34:	00000013          	nop
+  38:	00000013          	nop
+  3c:	00000013          	nop
+  40:	00000013          	nop

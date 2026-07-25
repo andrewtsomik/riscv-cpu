@@ -9,16 +9,20 @@ module data_mem(
 	output logic [31:0] mem_rd_dt
 );
 
-	logic [31:0] sig [0:31];
+	logic [31:0] sig [0:1023];
 	logic [3:0] byte_en;
 	logic [31:0] wr_dt_shifted;
+	string hexfile;
 	
 	initial begin
-		for(int i = 0; i < 32; i++)
+		for(int i = 0; i < 1024; i++)
 			sig[i] = 32'd0;
+		if(!$value$plusargs("HEX=%s", hexfile))
+			hexfile = "../programs/test.hex";
+		$readmemh(hexfile, sig);
 	end
 		
-	assign mem_rd_dt = mem_rd ? sig[mem_addr[6:2]] : 32'd0;
+	assign mem_rd_dt = mem_rd ? sig[mem_addr[11:2]] : 32'd0;
 	assign wr_dt_shifted = mem_wr_dt << {mem_addr[1:0], 3'b000};
 	
 	always_comb begin
@@ -48,13 +52,13 @@ module data_mem(
 	always_ff @(posedge clk) begin
 		if(mem_wr) begin
 			if(byte_en[0])
-		 		sig[mem_addr[6:2]][7:0] <= wr_dt_shifted[7:0];
+		 		sig[mem_addr[11:2]][7:0] <= wr_dt_shifted[7:0];
 			if(byte_en[1])
-				sig[mem_addr[6:2]][15:8] <= wr_dt_shifted[15:8];
+				sig[mem_addr[11:2]][15:8] <= wr_dt_shifted[15:8];
 			if(byte_en[2])
-				sig[mem_addr[6:2]][23:16] <= wr_dt_shifted[23:16];
+				sig[mem_addr[11:2]][23:16] <= wr_dt_shifted[23:16];
 			if(byte_en[3])
-				sig[mem_addr[6:2]][31:24] <= wr_dt_shifted[31:24];
+				sig[mem_addr[11:2]][31:24] <= wr_dt_shifted[31:24];
 		end			
 	end
 endmodule
