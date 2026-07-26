@@ -16,10 +16,6 @@ async def test_branch_top(dut):
     await Timer(1, unit="ns")
 
     reg = dut.reg_inst.registers
-
-    x5 = int(reg[5].value)
-    x6 = int(reg[6].value)
-    x8 = int(reg[8].value)
     
     for i in range(20):
         await RisingEdge(dut.clk)
@@ -30,6 +26,10 @@ async def test_branch_top(dut):
                       f"x5={int(dut.reg_inst.registers[5].value)} "
                       f"x6={int(dut.reg_inst.registers[6].value)} "
                       f"x8={int(dut.reg_inst.registers[8].value)}")
+    
+    x5 = int(reg[5].value)
+    x6 = int(reg[6].value)
+    x8 = int(reg[8].value)
 
     dut._log.info(f"x5 = {x5} x6 = {x6} x8 = {x8}")
 

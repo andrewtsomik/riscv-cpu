@@ -41,6 +41,9 @@ module cpu_top(
 	logic [7:0] uart_dt;
 	logic uart_send;
 	logic uart_busy;
+	
+	logic [31:0] pc_d1, pc_plus4_d1;
+	logic flush_d1;
 
 	//Stage 1: Fetch
 	always_ff @(posedge clk or posedge rst) begin
@@ -50,18 +53,36 @@ module cpu_top(
 			pc <= pc_next;
 	end
 
-	instruct_mem instruct_mem_inst(.addr(pc), .instruct(instruct));
+	instruct_mem instruct_mem_inst(.clk(clk), .en(!stall), .addr(pc), .instruct(instruct));
 
 	assign pc_plus4 = pc + 32'd4;
 	assign pc_next = id_ex_reg.jump ? jump_target : ((id_ex_reg.branch & cond) ? branch_target : pc_plus4);
 	assign if_id_next.instruct = instruct;
-	assign if_id_next.pc = pc;
-	assign if_id_next.pc_plus4 = pc_plus4;
+	assign if_id_next.pc = pc_d1;
+	assign if_id_next.pc_plus4 = pc_plus4_d1;
+	
+	always_ff @(posedge clk or posedge rst) begin
+		if(rst) begin
+			pc_d1 <= '0;
+			pc_plus4_d1 <= '0;
+		end
+		else if(!stall) begin
+			pc_d1 <= pc;
+			pc_plus4_d1 <= pc_plus4;
+		end
+	end
+	
+	always_ff @(posedge clk or posedge rst) begin
+		if(rst)
+			flush_d1 <= 1'b0;
+		else
+			flush_d1 <= flush;
+	end
 
 	always_ff @(posedge clk or posedge rst) begin
 		if(rst)
 			if_id_reg <= '0;
-		else if(flush)
+		else if(flush || flush_d1)
 			if_id_reg <= '0;
 		else if(!stall)
 			if_id_reg <= if_id_next;

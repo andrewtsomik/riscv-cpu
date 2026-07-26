@@ -17,11 +17,6 @@ async def test_cpu_top(dut):
     await Timer(1, unit="ns")
 
     reg = dut.reg_inst.registers
-
-    x5 = int(reg[5].value)
-    x6 = int(reg[6].value)
-    x7 = int(reg[7].value)
-    x8 = int(reg[8].value)
     
     for i in range(10):
         await RisingEdge(dut.clk)
@@ -33,6 +28,11 @@ async def test_cpu_top(dut):
                       f"x6={int(dut.reg_inst.registers[6].value)} "
                       f"x7={int(dut.reg_inst.registers[7].value)} "
                       f"x8={int(dut.reg_inst.registers[8].value)}")
+
+    x5 = int(reg[5].value)
+    x6 = int(reg[6].value)
+    x7 = int(reg[7].value)
+    x8 = int(reg[8].value)
 
     dut._log.info(f"x5 = {x5} x6 = {x6} x7 = {x7} x8 = {x8}")
 

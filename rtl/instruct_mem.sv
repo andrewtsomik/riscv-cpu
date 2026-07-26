@@ -1,4 +1,6 @@
 module instruct_mem(
+	input logic clk,
+	input logic en,
 	input logic [31:0] addr,
 	output logic [31:0] instruct
 );
@@ -18,6 +20,8 @@ module instruct_mem(
 		$readmemh(hexfile, arr);	
 `endif
 	end
-
-	assign instruct = arr[addr[11:2]];
+	always_ff @(posedge clk) begin 
+		if(en)
+			instruct <= arr[addr[11:2]];
+	end
 endmodule
