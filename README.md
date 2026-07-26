@@ -87,7 +87,7 @@ This confirms all 38 compliance tests pass on the board.
 ## Structure
 Implemented a five stage pipeline for the CPU with hazard handling.
 ### Diagram (Created by Claude Opus 5)
-<img width="1357" height="654" alt="image" src="https://github.com/user-attachments/assets/ef61c482-85f7-4167-b195-aecd58da4e67" />
+<img width="1345" height="634" alt="image" src="https://github.com/user-attachments/assets/31581d75-bb36-42a0-b1ef-cba23776d12a" />
 
 ### Fetch
 Computes PC+4 and decides whether the next PC will be sequential, branch target, or jump target. Also the instruction memory read uses BRAM so the PC is delayed one cycle to stay aligned with its instruction.
