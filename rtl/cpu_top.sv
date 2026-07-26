@@ -229,7 +229,15 @@ module cpu_top(
 
 	//UART
 	
-	assign uart_dt = wr_dt[7:0];
+	logic [31:0] x3_shadow;
+	always_ff @(posedge clk or posedge rst) begin
+		if(rst)
+			x3_shadow <= '0;
+		else if(mem_wb_reg.reg_wr && mem_wb_reg.wr_addr == 5'd3)
+			x3_shadow <= wr_dt;
+	end
+
+	assign uart_dt = x3_shadow[7:0] + 8'h30;
 
 	logic [23:0] send_timer;
 	always_ff @(posedge clk or posedge rst) begin
