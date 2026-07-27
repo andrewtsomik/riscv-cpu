@@ -1,7 +1,8 @@
 # Five Stage Pipelined RV32I Processor
 Programmed in SystemVerilog, ran on an S7-25 FPGA, and verified with official RISC-V tests.
 
-## Demo
+## Demo of Shadow Register Output over UART
+https://github.com/user-attachments/assets/c123ed0f-9343-433f-8851-143eb074b562
 
 ## Results
 
